@@ -1,0 +1,33 @@
+<configuration name="callcenter.conf" description="CallCenter">
+	<settings>
+		<param name="odbc-dsn" value="$${mwdb}" />
+		<!--<param name="dbname" value="/dev/shm/callcenter.db"/> -->
+	</settings>
+
+	<queues>
+
+		<queue name="1">
+			<param name="tier-rule-no-agent-no-wait" value="false" />
+			<param name="tier-rule-wait-second" value="300" />
+			<param name="max-wait-time-with-no-agent-time-reached" value="5" />
+			<param name="welcome-music" value="" />
+			<param name="moh-sound" value="/usr/local/freeswitch/sounds/moh/aw.wav" />
+			<param name="strategy" value="round-robin" />
+			<param name="agentWaitTime" value="10" />
+			<param name="abandoned-resume-allowed" value="false" />
+			<param name="max-wait-time-with-no-agent" value="0" />
+			<param name="time-base-score" value="system" />
+			<param name="discard-abandoned-after" value="60" />
+			<param name="tier-rules-apply" value="false" />
+			<param name="max-wait-time" value="0" />
+			<param name="tier-rule-wait-multiply-level" value="true" />
+		</queue>
+
+	</queues>
+
+	<agents>
+	</agents>
+	<tiers>
+	</tiers>
+
+</configuration>

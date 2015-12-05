@@ -1,0 +1,74 @@
+@CHARSET "UTF-8";
+
+.smart-form legend {
+	padding-top: 0px;
+}
+
+/* 设置电话详细信息下的所有显示信息为不可编辑 背景透明 */
+#newphoneInfo input {
+	border: none;
+	background-color: transparent;
+}
+
+#newdataInfo input {
+	border: none;
+	background-color: transparent;
+}
+
+/* 字体间距 */
+#first .label.col {
+	text-align: right;
+	padding-left: 12px;
+	padding-right: 12px;
+}
+
+.input input.readOnly {
+	background-color: transparent;
+	border: none;
+}
+
+div .select select.readOnly {
+	background-color: transparent;
+	border: none;
+}
+
+/* 文字描述 */
+.row .label.col.col-1 {
+	text-align: right;
+	text-justify: inter-ideograph;
+}
+
+
+
+
+.smart-form section {
+	margin-bottom: 5px;
+}
+
+.smart-form fieldset {
+	padding-top: 5px;
+}
+
+.jarviswidget {
+/* 	margin-bottom: 20px; */
+}
+
+.smart-form.widget-body-toolbar, .widget-body-toolbar {
+	border-bottom: none;
+}
+
+#newcstmInfo div section input[disabled] {
+	cursor: not-allowed;
+	background-color: #eee;
+	opacity: 1;
+}
+
+#newcstmInfo div section select[disabled] {
+	cursor: not-allowed;
+	background-color: #eee;
+	opacity: 1;
+}
+
+#wid-id-1-tabs-new .jarviswidget .widget-body {
+	min-height: none;
+}

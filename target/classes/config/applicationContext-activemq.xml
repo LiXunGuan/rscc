@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jms="http://www.springframework.org/schema/jms" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:amq="http://activemq.apache.org/schema/core"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-4.0.xsd
+		http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core-5.10.0.xsd">
+
+
+	<!-- run activemq in spring -->
+	<amq:broker id="activeMQBroker">
+		<amq:transportConnectors>
+			<amq:transportConnector uri="${jms.broker.url}" />
+		</amq:transportConnectors>
+	</amq:broker>
+
+	<!-- ConnectionFactory Definition -->
+	<!-- Activemq connection factory -->
+	<bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<constructor-arg index="0" value="${jms.broker.url}" />
+		<property name="useAsyncSend" value="true" />
+	</bean>
+
+	<!-- Spring CachingConnectionFactory -->
+	<bean id="connectionFactory"
+		class="org.springframework.jms.connection.CachingConnectionFactory">
+		<constructor-arg ref="amqConnectionFactory" />
+		<property name="sessionCacheSize" value="500" />
+		<property name="cacheProducers" value="true" />
+		<property name="cacheConsumers" value="true" />
+	</bean>
+
+
+	<!-- 发送消息 -->
+	<!-- JMS Template -->
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<!-- explicitQosEnabled是deliveryMode, priority, timeToLive 的开关，要生效，必须配置为true，默认false -->
+		<property name="explicitQosEnabled" value="true" />
+		<!-- deliveryMode: 1=NON_PERSISTENT, 2=PERSISTENT -->
+		<property name="deliveryMode" value="2" />
+	</bean>
+
+<!--     <bean id="callJmsListener" class="com.ruishengtech.rscc.app.call.CallJmsListener"/> -->
+<!--     <jms:listener-container connection-factory="connectionFactory"> -->
+<!--         <jms:listener destination="call" ref="callJmsListener"></jms:listener> -->
+<!--     </jms:listener-container> -->
+
+<!--     <bean id="scoreJmsListener" class="com.ruishengtech.rscc.app.score.ScoreJmsListener"/> -->
+<!--     <jms:listener-container connection-factory="connectionFactory"> -->
+<!--         <jms:listener destination="score" ref="scoreJmsListener"></jms:listener> -->
+<!--     </jms:listener-container> -->
+
+<!--     <bean id="smsJmsListener" class="com.ruishengtech.rscc.app.sms.SmsJsmListener"/> -->
+<!--     <jms:listener-container connection-factory="connectionFactory"> -->
+<!--         <jms:listener destination="sms" ref="smsJmsListener"></jms:listener> -->
+<!--     </jms:listener-container> -->
+
+</beans>

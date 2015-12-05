@@ -1,0 +1,71 @@
+/*
+ * It is advised not to edit the smartadmin_production.css
+ * as this will override any changes you make in the 
+ * later versions of this theme. 
+ * 
+ * We advise that you use use this CSS to override 
+ * SmartAdmin styles. 
+ * 
+ * Rename the stylesheet to whatever your liking so it will stay
+ * unique to you with each update of SmartAdmin.
+ */
+
+/*
+ *
+ * 自定义样式
+ * INDEX
+ * 
+ * - HTML
+ * - BODY
+ * - CUSTOM STYLES
+ */
+ 
+table a {
+	font-size: 12px;
+	font-weight: normal;
+}
+/* hover样式 */
+a:hover {
+	cursor: pointer;
+	text-decoration: none;
+}
+
+/* 表格样式 */
+table {
+	font-size: 14px !important;
+	font-weight: normal;
+}
+
+.table-hover>tbody>tr:hover {
+	background-color: #BFEFFF;
+}
+
+/* 下拉框样式 */
+#dt_basic_cstm_des_length{
+	margin-right: 5px;
+	margin-left: 5px;
+	margin-top: 3px;
+}
+
+
+/* 每页长度显示 */
+/* .form-inline .form-control { */
+/*     display: inline-block; */
+/*     vertical-align: middle; */
+/*     margin-left: 10px; */
+/*     margin-top: 2px; */
+/* } */
+
+
+.dataTables_paginate.paging_listbox{
+	margin-top: 8px;
+    margin-right: 10px;
+}
+
+</style>
+
+
+
+
+
+ 

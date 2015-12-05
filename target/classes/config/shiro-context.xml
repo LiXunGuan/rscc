@@ -1,0 +1,47 @@
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<!--<beans xmlns="http://www.springframework.org/schema/beans"-->
+       <!--xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
+       <!--xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"-->
+       <!--xsi:schemaLocation="http://www.springframework.org/schema/beans-->
+<!--http://www.springframework.org/schema/beans/spring-beans.xsd-->
+<!--http://www.springframework.org/schema/context-->
+<!--http://www.springframework.org/schema/context/spring-context.xsd-->
+<!--http://www.springframework.org/schema/tx-->
+<!--http://www.springframework.org/schema/tx/spring-tx.xsd"-->
+        <!-->-->
+
+
+    <!--<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">-->
+        <!--<property name="loginUrl" value="/login" />-->
+        <!--<property name="securityManager" ref="securityManager"/>-->
+        <!--<property name="filterChainDefinitions">-->
+            <!--<value>-->
+                <!--/** = anon-->
+            <!--</value>-->
+        <!--</property>-->
+
+    <!--</bean>-->
+
+    <!--<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>-->
+
+    <!--<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">-->
+        <!--<property name="realm" ref="myRealm"/>-->
+        <!--<property name="rememberMeManager" ref="rememberMeManager"/>-->
+    <!--</bean>-->
+
+    <!--<bean id="myRealm" class="com.ruishengtech.gc.SysWebRealm"></bean>-->
+
+
+    <!--<bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">-->
+        <!--<constructor-arg value="rememberMe"/>-->
+        <!--<property name="httpOnly" value="true"/>-->
+        <!--<property name="maxAge" value="2592000"/>&lt;!&ndash; 30天 &ndash;&gt;-->
+    <!--</bean>-->
+
+    <!--<bean id="rememberMeManager"-->
+          <!--class="org.apache.shiro.web.mgt.CookieRememberMeManager">-->
+        <!--<property name="cipherKey" value="#{T(org.apache.shiro.codec.Base64).decode('htsoft123456789')}"/>-->
+        <!--<property name="cookie" ref="rememberMeCookie"/>-->
+    <!--</bean>-->
+
+<!--</beans>-->

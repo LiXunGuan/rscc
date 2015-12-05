@@ -1,0 +1,653 @@
+-- =============================================================================================================
+-- 此处永远放在最前面(写得不对的地方请更正):
+-- 1、添加原来没有的初始化语句,请在当前文件的对应版本中添加，并且在CrmInitSql.sql中添加好;
+-- 2、更新原有的初始化语句,在当前文件对应的版本中添加,并且建议直接修改原来的初始化语句;
+-- =============================================================================================================
+
+-- 2015/11/18  ning  添加一条高级选项
+INSERT INTO `sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00028', 'autoBusy', 'true');
+
+----------------------------- 修改链接表结构new_data_batch_department_link
+ALTER TABLE `new_data_batch_department_link`
+ADD COLUMN `is_auto`  char(1) NULL DEFAULT '0' AFTER `return_times`;
+-- ===================================================
+-- 添加批次删除权限 (create by chengxin 2015-10-26 13:59:00)
+INSERT INTO `user_action` VALUES ('122', '删除批次', '1', '', '', '', '0', '0', '79');
+INSERT INTO `user_permission` VALUES ('106', '删除批次', '122', '3.png', '3', '2015-09-30 10:04:08', '32');
+
+INSERT INTO `user_action` VALUES ('111', '呼出弹屏', '2', 'newuserdata/phoneInfoDetail', 'phoneInfoDetail', 'fa fa-lg fa-fw fa-tasks', '0', '91', '31');
+
+========================================================================================
+-- 1、修改菜单，更新菜单显示
+UPDATE `user_action` SET `uuid`='24', `action_name`='待审批客户管理', `action_type`='0', `action_url`='audit', `action_describe`='audit', `action_css`='fa fa-lg fa-fw fa-user', `action_json`='0', `parent_uuid`='26', `action_seq`='27' WHERE (`uuid`='24');
+UPDATE `user_action` SET `uuid`='25', `action_name`='意向客户管理', `action_type`='0', `action_url`='indent/data', `action_describe`='indentdata', `action_css`='fa fa-lg fa-fw fa-user', `action_json`='0', `parent_uuid`='26', `action_seq`='2' WHERE (`uuid`='25');
+UPDATE `user_action` SET `uuid`='27', `action_name`='成交客户管理', `action_type`='0', `action_url`='cstm/toAdminCstmIndex', `action_describe`='cstmtoAdminCstmIndex', `action_css`='fa fa-lg fa-fw fa-user', `action_json`='0', `parent_uuid`='26', `action_seq`='31' WHERE (`uuid`='27');
+-- UPDATE `user_action` SET `uuid`='28', `action_name`='客户池管理', `action_type`='0', `action_url`='cstmpool', `action_describe`='cstmpool', `action_css`='fa fa-lg fa-fw fa-user', `action_json`='0', `parent_uuid`='26', `action_seq`='32' WHERE (`uuid`='28');
+UPDATE `user_action` SET `uuid`='3', `action_name`='我的成交客户', `action_type`='0', `action_url`='cstm?level=agent', `action_describe`='cstm', `action_css`='fa fa-lg fa-fw fa-user', `action_json`='0', `parent_uuid`='26', `action_seq`='7' WHERE (`uuid`='3');
+UPDATE `user_action` SET `uuid`='95', `action_name`='我的意向客户', `action_type`='0', `action_url`='newuserdata/data_intend_index', `action_describe`='newuserdata_data_intend_index', `action_css`='fa fa-lg fa-fw fa-tasks', `action_json`='0', `parent_uuid`='26', `action_seq`='2' WHERE (`uuid`='95');
+
+-- 2.添加部门客服记录，修改客服记录 表单列显示顺序
+
+INSERT INTO `user_action` VALUES ('79', '部门客服记录', '0', 'calllog', 'calllogdept', 'fa fa-lg fa-fw fa-expand', '0', '0', '28');
+INSERT INTO `user_permission` VALUES ('100', '部门客服记录', '79', '部门客服记录', '2', '2015-10-26 10:20:37', NULL);
+
+UPDATE `design_column` SET `uuid`='28', `id`='28', `orders`='4', `column_name`='坐席名称', `column_name_db`='agent_name', `tableName`='sys_call_log', `column_type`='VARCHAR', `is_default`='1', `character_property`='64', `allow_select`='1', `allow_index`='1', `allow_show`='1', `allow_empty`='0', `column_value`='1', `is_hidden`='1', `is_readonly`='0' WHERE (`uuid`='28');
+UPDATE `design_column` SET `uuid`='29', `id`='29', `orders`='5', `column_name`='客户电话', `column_name_db`='call_phone', `tableName`='sys_call_log', `column_type`='VARCHAR', `is_default`='1', `character_property`='64', `allow_select`='1', `allow_index`='1', `allow_show`='1', `allow_empty`='0', `column_value`='1', `is_hidden`='1', `is_readonly`='0' WHERE (`uuid`='29');
+UPDATE `design_column` SET `uuid`='30', `id`='30', `orders`='3', `column_name`='呼叫时间', `column_name_db`='call_time', `tableName`='sys_call_log', `column_type`='DATE', `is_default`='1', `character_property`='1', `allow_select`='1', `allow_index`='1', `allow_show`='1', `allow_empty`='0', `column_value`='1', `is_hidden`='1', `is_readonly`='1' WHERE (`uuid`='30');
+UPDATE `design_column` SET `uuid`='32', `id`='32', `orders`='7', `column_name`='呼叫标记', `column_name_db`='in_out_flag', `tableName`='sys_call_log', `column_type`='ENUM', `is_default`='1', `character_property`='呼入,呼出,未呼通', `allow_select`='1', `allow_index`='0', `allow_show`='1', `allow_empty`='0', `column_value`='1', `is_hidden`='1', `is_readonly`='1' WHERE (`uuid`='32');
+
+-- 3.删除客户池
+DELETE FROM `user_action` WHERE	`uuid` = '28';
+DELETE FROM `user_permission` WHERE `uuid` = 38;
+
+-- 4.更新客户池名称为客户分类
+UPDATE `design_column` SET `uuid`='3', `id`='3', `orders`='3', `column_name`='客户分类', `column_name_db`='pool_id', `tableName`='cstm_customer', `column_type`='VARCHAR', `is_default`='1', `character_property`='1', `allow_select`='1', `allow_index`='1', `allow_show`='1', `allow_empty`='0', `column_value`='1', `is_hidden`=NULL, `is_readonly`=NULL WHERE (`uuid`='3');
+-- 5.删除所有有关客户池管理权限的数据
+DELETE FROM `user_permissionrole_permission_link` WHERE permission_uuid = 38;
+-- 6.修改默认池为默认分类
+UPDATE `cstm_customer_pool` SET `uuid`='de001', `pool_name`='默认分类', `pool_des`='默认分类', `create_time`='2015-10-22 16:05:41', `be_default`='1', `creater`='0' WHERE (`uuid`='de001');
+
+-- 7.修改了动态生成表的表结构，需要跑：
+-- 存储过程
+BEGIN
+	#Routine body goes here...
+	DECLARE _done int default 0; 
+	DECLARE tableName VARCHAR(64);
+	DECLARE v_sql varchar(500);
+	DECLARE _Cur CURSOR FOR 
+		SELECT table_name from information_schema.TABLES where TABLE_SCHEMA='crm' and table_name LIKE '%new_data_department_user_%' ;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET _done = 1; 
+	OPEN _Cur;
+	REPEAT 
+		FETCH _Cur INTO tableName; 
+		IF tableName != "new_data_department_user_log" THEN
+			SET v_sql= concat("ALTER TABLE ", tableName, " CHANGE COLUMN `is_saved` `be_audit` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0'");
+			SET @v_sql=v_sql;
+			PREPARE stmt FROM @v_sql;
+			EXECUTE stmt;
+		END IF;
+		#select tableName;
+	UNTIL _done END REPEAT;
+	CLOSE _Cur;  
+END
+
+
+ALTER TABLE `new_data_department_user`
+MODIFY COLUMN `intent_limit`  int(11) NULL DEFAULT NULL AFTER `total_limit`;
+
+
+-- 8.更新客户管理请求地址
+UPDATE `user_action` SET `uuid`='27', `action_name`='成交客户管理', `action_type`='0', `action_url`='cstm', `action_describe`='cstmtoAdminCstmIndex', `action_css`='fa fa-lg fa-fw fa-user', `action_json`='0', `parent_uuid`='26', `action_seq`='31' WHERE (`uuid`='27');
+
+
+9、添加了个人配置项，需要更新user_config表中config字段长度
+
+ALTER TABLE user_config MODIFY COLUMN config VARCHAR(1024);
+
+10、添加一个意向数据表
+
+-- ----------------------------
+-- Table structure for `new_data_department_user_intent`
+-- ----------------------------
+DROP TABLE IF EXISTS `new_data_department_user_intent`;
+CREATE TABLE `new_data_department_user_intent` (
+  `uuid` varchar(64) NOT NULL,
+  `batch_uuid` varchar(32) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `json` varchar(1024) default NULL,
+  `own_department` varchar(64) default NULL,
+  `own_department_timestamp` datetime default NULL,
+  `own_user` varchar(64) default NULL,
+  `own_user_timestamp` datetime default NULL,
+  `call_count` int(11) default '0',
+  `last_call_result` varchar(64) default NULL,
+  `last_call_time` datetime default NULL,
+  `intent_type` varchar(64) default NULL,
+  `intent_timestamp` datetime default NULL,
+  `be_audit` char(1) default '0',
+  `yuyue_timestamp` datetime default NULL,
+  PRIMARY KEY  (`uuid`),
+  UNIQUE KEY `phone_number` (`phone_number`),
+  KEY `last_call_time` USING BTREE (`last_call_time`),
+  KEY `own_department_timestamp` USING BTREE (`own_department_timestamp`),
+  KEY `own_user` USING BTREE (`own_user`),
+  KEY `batch_uuid` USING BTREE (`batch_uuid`),
+  KEY `intent_timestamp` USING BTREE (`intent_timestamp`),
+  KEY `intent_type` USING BTREE (`intent_type`),
+  KEY `own_user_timestamp` USING BTREE (`own_user_timestamp`),
+  KEY `own_department` USING BTREE (`own_department`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- 跟新  new_data_intent 表中UUID编号
+-- 齐正已经更新 2015年11月6日21:04:54
+-- 小吴客户已经更新 2015年11月6日21:05:31   218.64.118.198
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=================================================================================================================================
+程序TAG版本：TAG_RSCC1000_1.0.5_beta_build1023
+发布时间：2015年10月23日
+
+-- 1、更新时检查 sys_config配置项是否达到第26的id
+INSERT INTO `sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00022', 'sys.call.bindexten', '1');
+INSERT INTO `sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00023', 'sys.recording.config', 'all');
+INSERT INTO `sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00024', 'sys.call.datasave', 'task');
+INSERT INTO `sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00025', 'sys.data.getIntentTotalLimit', '500');
+INSERT INTO `sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00026', 'autoFrozen', 'false');
+INSERT INTO `sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00027', 'sys.globalshare.deleteFlag', '7');
+
+-- 2.gateWay菜单名称修改为：网关配置  注意：user_action 和user_permission两个表都要修改
+
+-- 3.添加意向客户管理菜单：
+INSERT INTO `user_action` VALUES ('25', '意向客户管理', '0', 'indent/data', 'indentdata', 'fa fa-lg fa-fw fa-user', '0', '0', '26');
+INSERT INTO `user_permission` VALUES ('25', '意向客户管理', '25', '意向客户管理', '1', '2015-10-14 17:23:08', '23');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '25');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000002', '25');
+
+-- 4.添加中间件菜单
+INSERT INTO `crm`.`user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('76', 'IPPBX状态', '0', NULL, NULL, 'fa fa-lg fa-fw fa-dashboard', '0', '0', '37');
+INSERT INTO `crm`.`user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('77', '分机状态', '0', 'runtime/sipuserruntime', 'runtimesipuserruntime', 'fa fa-lg fa-fw fa-dashboard', '0', '76', '2');
+INSERT INTO `crm`.`user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('78', '坐席状态', '0', 'runtime/agentruntime', 'runtimeagentruntime', 'fa fa-lg fa-fw fa-dashboard', '0', '76', '3');
+INSERT INTO `crm`.`user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('80', '技能组状态', '0', 'runtime/queueruntime', 'runtimequeueruntime', 'fa fa-lg fa-fw fa-dashboard', '0', '76', '4');
+INSERT INTO `crm`.`user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('50', '通话状态', '0', 'runtime/callruntime', 'runtimecallruntime', 'fa fa-lg fa-fw fa-dashboard', '0', '76', '5');
+
+
+INSERT INTO `crm`.`user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('30', 'IPPBX状态', '76', 'IPPBX状态', '3', '2015-10-16 14:08:31', NULL);
+INSERT INTO `crm`.`user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('31', '分机状态', '77', '分机状态', '30', '2015-10-16 14:09:32', '2');
+INSERT INTO `crm`.`user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('32', '坐席状态', '78', '坐席状态', '30', '2015-10-16 14:10:04', '3');
+INSERT INTO `user_permission` VALUES ('34', '技能组状态', '80', '技能组状态', '30', '2015-10-16 17:19:29', '5');
+INSERT INTO `crm`.`user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('35', '通话状态', '50', '通话状态', '30', '2015-10-19 11:49:26', '4');
+
+
+
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '30');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '31');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '32');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '34');
+
+
+
+UPDATE `crm`.`user_action` SET `uuid`='38', `action_name`='技能组详情', `action_type`='0', `action_url`='runtime/queueruntime/get', `action_describe`='runtimequeueruntimeget', `action_css`='fa fa-lg fa-fw fa-dashboard', `action_json`='0', `parent_uuid`='76', `action_seq`='5' WHERE (`uuid`='38');
+UPDATE `crm`.`user_permission` SET `uuid`='48', `permission_name`='技能组详情', `permission`='38', `permission_describe`='技能组详情', `parent_uuid`='30', `date`='2015-09-22 10:24:42', `sequence`='6' WHERE (`uuid`='48');
+
+
+
+---------------------------------------------------------------------------------------------
+程序TAG版本：TAG_RSCC1000_1.0.3_beta_build0915
+程序包版本：RSCC1000_1.0.2_beta_build0000.war
+发布时间：2015年9月15日21:14:50
+
+1、表更新：ScheduleReminder添加phoneNumber（phone_number）字段;
+ALTER TABLE `schedule_reminder`
+ADD COLUMN `phone_number`  varchar(255) NULL AFTER `phone_number`;
+
+2、我的待办事项 --》我的预约
+
+3、在sys.properties中添加是否启用认证中心配置
+
+4、
+-- V1.03菜单修改为1.04 2015/09/23 by ning
+-- UPDATE `crm`.`user_action` SET `uuid`='56', `action_name`='SIP参数配置', `action_type`='0', `action_url`='config/sipprofile', `action_describe`='configsipprofile', `action_css`='fa fa-lg fa-fw fa-asterisk ', `action_json`='0', `parent_uuid`='57', `action_seq`='8' WHERE (`uuid`='56');
+-- UPDATE `crm`.`user_action` SET `uuid`='66', `action_name`='技能组管理', `action_type`='0', `action_url`='config/queue', `action_describe`='configqueue', `action_css`='fa fa-lg fa-fw fa-asterisk ', `action_json`='0', `parent_uuid`='57', `action_seq`='9' WHERE (`uuid`='66');
+-- DELETE FROM user_action WHERE uuid='53' AND action_name LIKE '网络配置' AND parent_uuid = '0';
+-- DELETE FROM user_action WHERE uuid='103' AND action_name LIKE '字典管理' AND parent_uuid = '39';
+-- DELETE FROM user_action WHERE uuid='44' AND action_name LIKE '高级选项' AND parent_uuid = '39';
+-- UPDATE `crm`.`user_action` SET `uuid`='105', `action_name`='高级选项', `action_type`='0', `action_url`='otherconfig', `action_describe`='otherconfig', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='8' WHERE (`uuid`='105');
+-- UPDATE `crm`.`user_action` SET `uuid`='40', `action_name`='用户管理', `action_type`='0', `action_url`='user/user', `action_describe`='useruser', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='1' WHERE (`uuid`='40');
+-- UPDATE `crm`.`user_action` SET `uuid`='41', `action_name`='角色管理', `action_type`='0', `action_url`='user/permissionrole', `action_describe`='userpermissionrole', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='2' WHERE (`uuid`='41');
+-- UPDATE `crm`.`user_action` SET `uuid`='42', `action_name`='部门管理', `action_type`='0', `action_url`='user/datarange', `action_describe`='userdatarange', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='3' WHERE (`uuid`='42');
+-- UPDATE `crm`.`user_action` SET `uuid`='43', `action_name`='自定义表管理', `action_type`='0', `action_url`='design', `action_describe`='design', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='4' WHERE (`uuid`='43');
+-- UPDATE `crm`.`user_action` SET `uuid`='55', `action_name`='网络配置', `action_type`='0', `action_url`='netconfig', `action_describe`='netconfig', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='7' WHERE (`uuid`='55');
+-- UPDATE `crm`.`user_action` SET `uuid`='39', `action_name`='系统配置', `action_type`='0', `action_url`=NULL, `action_describe`=NULL, `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='0', `action_seq`='41' WHERE (`uuid`='39');
+-- UPDATE `crm`.`user_action` SET `uuid`='57', `action_name`='IPPBX配置', `action_type`='0', `action_url`=NULL, `action_describe`=NULL, `action_css`='fa fa-lg fa-fw fa-asterisk ', `action_json`='0', `parent_uuid`='0', `action_seq`='39' WHERE (`uuid`='57');
+-- DELETE FROM user_permission where uuid='60' AND permission_name LIKE '网络配置';
+-- DELETE FROM user_permission where uuid='82' AND permission_name LIKE '字典管理';
+-- DELETE FROM user_permission where uuid='54' AND permission_name LIKE '系统配置';
+-- UPDATE `crm`.`user_permission` SET `uuid`='62', `permission_name`='网络配置', `permission`='55', `permission_describe`='网络配置', `parent_uuid`='49', `date`='2015-09-17 16:50:42', `sequence`=NULL WHERE (`uuid`='62');
+-- UPDATE `crm`.`user_permission` SET `uuid`='63', `permission_name`='SIP参数配置', `permission`='56', `permission_describe`='SIP参数配置', `parent_uuid`='64', `date`='2015-09-17 16:50:42', `sequence`='8' WHERE (`uuid`='63');
+-- UPDATE `crm`.`user_permission` SET `uuid`='73', `permission_name`='技能组管理', `permission`='66', `permission_describe`='技能组管理', `parent_uuid`='64', `date`='2015-09-17 16:50:43', `sequence`='9' WHERE (`uuid`='73');
+-- UPDATE `crm`.`user_permission` SET `uuid`='49', `permission_name`='系统配置', `permission`='39', `permission_describe`='系统配置', `parent_uuid`='3', `date`='2015-09-17 16:50:42', `sequence`='31' WHERE (`uuid`='49');
+-- UPDATE `crm`.`user_permission` SET `uuid`='64', `permission_name`='IPPBX配置', `permission`='57', `permission_describe`='IPPBX配置', `parent_uuid`='3', `date`='2015-09-17 16:50:43', `sequence`='29' WHERE (`uuid`='64');
+-- DELETE FROM user_permissionrole_permission_link where permission_uuid = '60';
+-- DELETE FROM user_permissionrole_permission_link where permission_uuid = '82';
+-- DELETE FROM user_permissionrole_permission_link where permission_uuid = '54';
+
+5、添加菜单：关于RSCC
+INSERT INTO `crm`.`user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('106', '关于RSCC', '123', '关于RSCC', '49', '2015-06-26 16:05:07', NULL);
+INSERT INTO `crm`.`user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('123', '关于RSCC', '0', 'about', 'about', 'fa fa-lg fa-fw fa-cogs', '0', '39', '45');
+
+6、添加发起者uuid记录；
+ALTER TABLE `cstm_cstmservice`
+ADD COLUMN `cstmservice_reporter_uuid`  varchar(64) NULL AFTER `cstmservice_reporter`;
+
+7.sys_config添加置忙原因和数据上限设置值
+INSERT INTO `crm`.`sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00019', 'sys.data.getDataTotalLimit', '200');
+INSERT INTO `crm`.`sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00020', 'sys.data.getDataDayLimit', '100');
+INSERT INTO `crm`.`sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00021', 'sys.data.getDataSingleLimit', '50');
+
+8.new_data_department_user_log添加字段 type_des
+高级选项取消批次间去重的配置;.
+修改过的表结构
+databatchdepartmentlink
+new_data_department_user_log
+
+
+9.-- 新订单管理
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('40',  '1', '订单编号', 'order_id', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('41',  '2', '订单状态', 'order_status', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('42',  '3', '收货人', 'receive_user_name', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('43',  '4', '手机号码', 'receive_user_mobile', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('44',  '5', '地      址', 'receive_user_address', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('45',  '6', '支付状态', 'pay_status', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('46',  '7', '运费', 'freight', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('47',  '8', '发票类型', 'invoice_type', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('48',  '9', '发票具体信息', 'invoice_info', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('49',  '10', '创建用户', 'order_user_uuid', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('50',  '11', '下单时间', 'order_create_time', 'new_order_info', 'DATE', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+
+INSERT INTO `crm`.`design_column` (`uuid`,  `orders`, `column_name`, `column_name_db`, `tableName`, `column_type`, `is_default`, `character_property`, `allow_select`, `allow_index`, `allow_show`, `allow_empty`, `column_value`, `is_hidden`, `is_readonly`) VALUES ('51',  '12', 'call_session_uuid', 'call_session_uuid', 'new_order_info', 'VARCHAR', '1', '1', '1', '1', '1', '0', '1', NULL, NULL);
+INSERT INTO `crm`.`design_table` (`uuid`, `table_name`, `table_json`, `name`) VALUES ('5', 'new_order_info', '{}', '订单管理');
+
+修改之前的(订单管理/我的订单)路径为neworderinfo
+UPDATE `crm`.`user_action` SET `uuid`='30', `action_name`='订单管理', `action_type`='0', `action_url`=NULL, `action_describe`=NULL, `action_css`='fa fa-lg fa-fw fa-shopping-cart', `action_json`='0', `parent_uuid`='0', `action_seq`='30' WHERE (`uuid`='30');
+UPDATE `crm`.`user_action` SET `uuid`='32', `action_name`='订单管理', `action_type`='0', `action_url`='neworderinfo', `action_describe`='neworderinfo', `action_css`='fa fa-lg fa-fw fa-shopping-cart', `action_json`='0', `parent_uuid`='30', `action_seq`='32' WHERE (`uuid`='32');
+
+-- 10.添加新的高级选项
+INSERT INTO `crm`.`sys_config` (`uuid`, `syskey`, `sysval`) VALUES ('de00022', 'sys.call.bindexten', '1');
+
+-- 11.添加无效数据管理菜单： 2015/10/08
+INSERT INTO `user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '21');
+INSERT INTO `user_permission` VALUES ('21', '共享池管理', '21', '共享池管理', '91', '2015-06-26 16:05:07', NULL);
+INSERT INTO `user_action` VALUES ('21', '无效数据', '0', 'invalid/data', 'invaliddata', 'fa fa-lg fa-fw fa-tasks', '0', '91', '29');
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------
+程序TAG版本：TAG_RSCC1000_1.0.3_beta_build0915
+程序包版本：RSCC1000_1.0.2_beta_build0000.war
+发布时间：2015年9月15日21:14:50
+
+
+更新步骤:
+
+1、删除crm库中所有new_开头的表；
+
+2、熊飞的那些更新语句要跑一下；
+
+3、启动系统，待所有new开头的新表创建出来之后再进行第四步
+
+4、跑下面的语句把客户导入资源总表（如果执行第六步的话可以忽略这一步）
+
+INSERT INTO new_data_phone_resource (
+     phone_number,
+     customer_uuid,
+     batch_uuid
+)(
+     SELECT
+          phone_number,
+          uuid customer_uuid,
+          '' batch_uuid 
+     from cstm_customer
+)
+
+
+5、添加其他索引
+
+6、http://ip:8080/rscc/userManage/levelUp
+
+7、修改配置文件为：加new
+	sys.data.call.getdata=/newdata/groupCall/getGroupCallData
+	sys.data.call.returncall=/newdata/groupCall/returnGroupCall
+	sys.data.call.stopcall=/newdata/groupCall/stopGroupCall
+
+8、查询 然后删除；
+	SELECT * FROM `user_permissionrole_permission_link` WHERE permission_uuid in ('31','12','32','33','34','35');
+	SELECT * FROM `user_action` WHERE uuid = '2';
+9、删除user_action和中
+
+步骤2要执行的sql:
+
+INSERT INTO `user_action` VALUES ('1', '我的预约', '0', 'schedulereminder?level=agent', 'schedulereminder', 'fa fa-lg fa-fw fa-calendar', '0', '0', '1');
+INSERT INTO `user_action` VALUES ('10', '我的知识库', '0', 'knowledge/knowledge?level=agent', 'knowledgeknowledge', 'fa fa-lg fa-fw fa-book', '0', '0', '10');
+INSERT INTO `user_action` VALUES ('11', '我的数据历史', '0', 'userpooldata', 'userpooldata', 'fa fa-lg fa-fw fa-clock-o', '0', '0', '2');
+-- INSERT INTO `user_action` VALUES ('21', '数据管理', '0', null, null, 'fa fa-lg fa-fw  fa-cubes', '0', '0', '21');
+-- INSERT INTO `user_action` VALUES ('22', '数据管理', '0', 'data/data', 'datadata', 'fa fa-lg fa-fw  fa-cubes', '0', '21', '22');
+-- INSERT INTO `user_action` VALUES ('23', '人员数据管理', '0', 'data/project', 'dataproject', 'fa fa-lg fa-fw  fa-cubes', '0', '21', '23');
+-- INSERT INTO `user_action` VALUES ('24', '数据池管理', '0', 'data/dataPool', 'datadataPool', 'fa fa-lg fa-fw  fa-cubes', '0', '21', '24');
+-- INSERT INTO `user_action` VALUES ('25', '群呼管理', '0', 'data/groupCall', 'datagroupCall', 'fa fa-lg fa-fw  fa-cubes', '0', '21', '25');
+INSERT INTO `user_action` VALUES ('26', '客户管理', '0', null, null, 'fa fa-lg fa-fw fa-user', '0', '0', '26');
+INSERT INTO `user_action` VALUES ('27', '客户管理', '0', 'cstm/toAdminCstmIndex', 'cstmtoAdminCstmIndex', 'fa fa-lg fa-fw fa-user', '0', '26', '27');
+INSERT INTO `user_action` VALUES ('28', '客户池管理', '0', 'cstmpool', 'cstmpool', 'fa fa-lg fa-fw fa-user', '0', '26', '28');
+INSERT INTO `user_action` VALUES ('29', '工单管理', '0', 'cstmservice', 'cstmservice', 'fa fa-lg fa-fw fa-comments-o', '0', '0', '29');
+INSERT INTO `user_action` VALUES ('3', '我的客户', '0', 'cstm?level=agent', 'cstm', 'fa fa-lg fa-fw fa-user', '0', '0', '3');
+INSERT INTO `user_action` VALUES ('30', '订单管理', '0', null, null, 'fa fa-lg fa-fw fa-shopping-cart', '0', '0', '30');
+INSERT INTO `user_action` VALUES ('31', '产品管理', '0', 'product?level=monitor', 'product', 'fa fa-lg fa-fw fa-shopping-cart', '0', '30', '31');
+INSERT INTO `user_action` VALUES ('32', '订单管理', '0', 'orderinfo', 'orderinfo', 'fa fa-lg fa-fw fa-shopping-cart', '0', '30', '32');
+INSERT INTO `user_action` VALUES ('33', '录音质检管理', '0', 'record', 'record', 'fa fa-lg fa-fw fa-microphone', '0', '0', '33');
+INSERT INTO `user_action` VALUES ('34', '公告管理', '0', 'agentnotice/manager', 'agentnoticemanager', 'fa fa-lg fa-fw fa-comments', '0', '0', '34');
+INSERT INTO `user_action` VALUES ('35', '知识库管理', '0', null, null, 'fa fa-lg fa-fw fa-book', '0', '0', '35');
+INSERT INTO `user_action` VALUES ('36', '知识库管理', '0', 'knowledge/knowledge/manager', 'knowledgemanager', 'fa fa-lg fa-fw fa-book', '0', '35', '36');
+INSERT INTO `user_action` VALUES ('37', '目录管理', '0', 'knowledge/directory', 'knowledgedirectory', 'fa fa-lg fa-fw fa-book', '0', '35', '37');
+INSERT INTO `user_action` VALUES ('38', '技能组状态', '0', 'runtime/queueruntime/get', 'runtimequeueruntimeget', 'fa fa-lg fa-fw fa-star-o ', '0', '0', '38');
+INSERT INTO `user_action` VALUES ('39', '系统配置', '0', null, null, 'fa fa-lg fa-fw fa-cogs', '0', '0', '39');
+INSERT INTO `user_action` VALUES ('4', '我的工单', '0', 'cstmservice?level=agent', 'agentcstmservice', 'fa fa-lg fa-fw fa-comments-o', '0', '0', '4');
+INSERT INTO `user_action` VALUES ('40', '用户管理', '0', 'user/user', 'useruser', 'fa fa-lg fa-fw fa-cogs', '0', '39', '40');
+INSERT INTO `user_action` VALUES ('41', '角色管理', '0', 'user/permissionrole', 'userpermissionrole', 'fa fa-lg fa-fw fa-cogs', '0', '39', '41');
+INSERT INTO `user_action` VALUES ('42', '部门管理', '0', 'user/datarange', 'userdatarange', 'fa fa-lg fa-fw fa-cogs', '0', '39', '42');
+INSERT INTO `user_action` VALUES ('43', '自定义表管理', '0', 'design', 'design', 'fa fa-lg fa-fw fa-cogs', '0', '39', '43');
+INSERT INTO `user_action` VALUES ('44', '高级选项', '0', 'sysconfig', 'sysconfig', 'fa fa-lg fa-fw fa-cogs', '0', '39', '44');
+INSERT INTO `user_action` VALUES ('45', '录音质检', '1', null, null, null, '0', '0', '45');
+INSERT INTO `user_action` VALUES ('46', '添加信息', '2', 'pop_event', 'addInfo', 'fa fa-lg fa-fw fa-clock-o', '0', '0', '46');
+INSERT INTO `user_action` VALUES ('47', '呼叫', '2', 'usercall', 'usercall', 'fa fa-lg fa-fw fa-clock-o', '0', '0', '47');
+INSERT INTO `user_action` VALUES ('48', '呼叫队列', '2', 'usercall/call_queue', 'startCall', 'fa fa-lg fa-fw fa-clock-o', '0', '0', '48');
+INSERT INTO `user_action` VALUES ('49', '报表管理', '0', null, null, 'fa fa-lg fa-fw fa-table', '0', '0', '36');
+INSERT INTO `user_action` VALUES ('5', '我的客服记录', '0', 'calllog?level=agent', 'calllog', 'fa fa-lg fa-fw fa-expand', '0', '0', '5');
+INSERT INTO `user_action` VALUES ('50', '话务报表', '0', 'report', 'report', 'fa fa-lg fa-fw fa-table', '0', '49', '1');
+INSERT INTO `user_action` VALUES ('51', '业务报表', '0', 'report', 'report', 'fa fa-lg fa-fw fa-table', '0', '49', '2');
+INSERT INTO `user_action` VALUES ('52', '计费报表', '0', 'report/bill', 'reportbill', 'fa fa-lg fa-fw fa-table', '0', '49', '3');
+INSERT INTO `user_action` VALUES ('53', '网络配置', '0', null, null, 'fa fa-lg fa-fw fa-wrench', '0', '0', '40');
+INSERT INTO `user_action` VALUES ('55', '网络配置', '0', 'netconfig', 'netconfig', 'fa fa-lg fa-fw fa-wrench ', '0', '53', '2');
+INSERT INTO `user_action` VALUES ('56', 'SIP参数配置', '0', 'config/sipprofile', 'configsipprofile', 'fa fa-lg fa-fw fa-wrench ', '0', '53', '3');
+INSERT INTO `user_action` VALUES ('57', 'IPPBX配置', '0', null, null, 'fa fa-lg fa-fw fa-asterisk ', '0', '0', '41');
+INSERT INTO `user_action` VALUES ('58', 'Gateway配置', '0', 'config/gateway', 'configgateway', 'fa fa-lg fa-fw fa-asterisk ', '0', '57', '1');
+INSERT INTO `user_action` VALUES ('59', '接入号配置', '0', 'config/accessnumber', 'configaccessnumber', 'fa fa-lg fa-fw fa-asterisk ', '0', '57', '2');
+INSERT INTO `user_action` VALUES ('6', '我的订单', '0', 'orderinfo?level=agent', 'agentorderinfo', 'fa fa-lg fa-fw fa-shopping-cart', '0', '0', '6');
+INSERT INTO `user_action` VALUES ('60', '分机配置', '0', 'config/sipuser', 'configsipuser', 'fa fa-lg fa-fw fa-asterisk ', '0', '57', '3');
+INSERT INTO `user_action` VALUES ('61', '语音资源配置', '0', 'system/uploadingvoice', 'systemuploadingvoice', 'fa fa-lg fa-fw fa-asterisk ', '0', '57', '4');
+INSERT INTO `user_action` VALUES ('62', 'IVR配置', '0', 'config/ivr', 'configivr', 'fa fa-lg fa-fw fa-asterisk ', '0', '57', '5');
+INSERT INTO `user_action` VALUES ('63', '呼入路由', '0', 'config/accessnumberroute', 'configaccessnumberroute', 'fa fa-lg fa-fw fa-asterisk ', '0', '57', '6');
+INSERT INTO `user_action` VALUES ('64', '呼出路由', '0', 'config/sysconfig', 'configsysconfig', 'fa fa-lg fa-fw fa-asterisk ', '0', '57', '7');
+INSERT INTO `user_action` VALUES ('66', '技能组管理', '0', 'config/queue', 'configqueue', 'fa fa-lg fa-fw fa-star', '0', '0', '42');
+INSERT INTO `user_action` VALUES ('67', '计费管理', '0', null, null, 'fa fa-lg fa-fw fa-jpy', '0', '0', '26');
+INSERT INTO `user_action` VALUES ('68', '计费明细', '0', 'billing/data', 'billingdata', 'fa fa-lg fa-fw fa-jpy', '0', '67', '1');
+INSERT INTO `user_action` VALUES ('69', '费率设置', '0', 'billing/rate', 'billingrate', 'fa fa-lg fa-fw fa-jpy', '0', '67', '2');
+INSERT INTO `user_action` VALUES ('7', '我的录音', '0', 'record?level=agent', 'agentrecord', 'fa fa-lg fa-fw fa-microphone', '1', '0', '7');
+INSERT INTO `user_action` VALUES ('70', '接入号-话务报表', '0', 'report/reportaccessnumbertraffic', 'reportreportaccessnumbertraffic', 'fa fa-lg fa-fw fa-table', '0', '49', '4');
+INSERT INTO `user_action` VALUES ('71', '分机-话务报表', '0', 'report/reportextentraffic', 'reportreportextentraffic', 'fa fa-lg fa-fw fa-table', '0', '49', '5');
+INSERT INTO `user_action` VALUES ('72', '坐席-话务报表', '0', 'report/reportagenttraffic', 'reportreportagenttraffic', 'fa fa-lg fa-fw fa-table', '0', '49', '6');
+INSERT INTO `user_action` VALUES ('73', '坐席-KPI报表', '0', 'report/reportagentkpi', 'reportreportagentkpi', 'fa fa-lg fa-fw fa-table', '0', '49', '7');
+INSERT INTO `user_action` VALUES ('74', '技能组-KPI报表', '0', 'report/reportqueuekpi', 'reportreportqueuekpi', 'fa fa-lg fa-fw fa-table', '0', '49', '8');
+INSERT INTO `user_action` VALUES ('8', '我的多方通话', '0', 'confrence?level=agent', 'confrence', 'fa fa-lg fa-fw fa-group', '0', '0', '8');
+INSERT INTO `user_action` VALUES ('9', '我的公告', '0', 'agentnotice?level=agent', 'agentnotice', 'fa fa-lg fa-fw fa-comments', '0', '0', '9');
+INSERT INTO `user_action` VALUES ('75', '查看号码', '1', '', '', '', '0', '0', '75');
+
+
+-- ----------------------------
+-- 初始化所有权限
+-- ----------------------------
+
+INSERT INTO `user_permission` VALUES ('1', '坐席', '', '1_open.png', '', '2015-07-06 16:54:20', null);
+
+INSERT INTO `user_permission` VALUES ('11', '我的预约', '1', '我的预约', '1', NOW(), '1');
+INSERT INTO `user_permission` VALUES ('13', '我的客户', '3', '我的客户', '1', NOW(), '3');
+INSERT INTO `user_permission` VALUES ('14', '我的工单', '4', '我的工单', '1', NOW(), '4');
+INSERT INTO `user_permission` VALUES ('15', '我的客服记录', '5', '我的客服记录', '1', NOW(), '5');
+INSERT INTO `user_permission` VALUES ('16', '我的订单', '6', '我的订单', '1', NOW(), '6');
+INSERT INTO `user_permission` VALUES ('17', '我的录音', '7', '我的录音', '1', NOW(), '7');
+INSERT INTO `user_permission` VALUES ('18', '我的多方通话', '8', '我的多方通话', '1', NOW(), '8');
+INSERT INTO `user_permission` VALUES ('19', '我的公告', '9', '我的公告', '1', NOW(), '9');
+INSERT INTO `user_permission` VALUES ('20', '我的知识库', '10', '我的知识库', '1', NOW(), '10');
+-- INSERT INTO `user_permission` VALUES ('21', '我的数据历史', '11', '我的数据历史', '1', NOW(), '11');
+
+INSERT INTO `user_permission` VALUES ('2', '班长', '', '1_open.png', '', NOW(), null);
+
+-- INSERT INTO `user_permission` VALUES ('31', '数据管理', '21', '数据管理', '2', NOW(), '21');
+-- INSERT INTO `user_permission` VALUES ('32', '数据管理', '22', '数据管理', '31', NOW(), null);
+-- INSERT INTO `user_permission` VALUES ('33', '人员数据管理', '23', '人员数据管理', '31', NOW(), null);
+-- INSERT INTO `user_permission` VALUES ('34', '数据池管理', '24', '数据池管理', '31', NOW(), null);
+-- INSERT INTO `user_permission` VALUES ('35', '群呼管理', '25', '群呼管理', '31', NOW(), null);
+
+INSERT INTO `user_permission` VALUES ('36', '客户管理', '26', '客户管理', '2', NOW(), '22');
+INSERT INTO `user_permission` VALUES ('37', '客户管理', '27', '客户管理', '36', NOW(), '1');
+INSERT INTO `user_permission` VALUES ('38', '客户池管理', '28', '客户池管理', '36', NOW(), '2');
+
+INSERT INTO `user_permission` VALUES ('39', '工单管理', '29', '工单管理', '2', NOW(), '23');
+
+INSERT INTO `user_permission` VALUES ('40', '订单管理', '30', '订单管理', '2', NOW(), '24');
+INSERT INTO `user_permission` VALUES ('41', '产品管理', '31', '产品管理', '40', NOW(), null);
+INSERT INTO `user_permission` VALUES ('42', '订单管理', '32', '订单管理', '40', NOW(), null);
+
+INSERT INTO `user_permission` VALUES ('43', '录音质检管理', '33', '录音质检管理', '2', NOW(), '25');
+
+INSERT INTO `user_permission` VALUES ('44', '公告管理', '34', '公告管理', '2', NOW(), '26');
+
+INSERT INTO `user_permission` VALUES ('45', '知识库管理', '35', '知识库管理', '2', NOW(), '27');
+INSERT INTO `user_permission` VALUES ('46', '知识库管理', '36', '知识库管理', '45', NOW(), null);
+INSERT INTO `user_permission` VALUES ('47', '目录管理', '37', '目录管理', '45', NOW(), null);
+
+INSERT INTO `user_permission` VALUES ('48', '技能组状态', '38', '技能组状态', '2', NOW(), '28');
+
+INSERT INTO `user_permission` VALUES ('3', '管理员', '', '1_open.png', '', NOW(), NULL);
+
+INSERT INTO `user_permission` VALUES ('49', '系统配置', '39', '系统配置', '3', NOW(), '29');
+INSERT INTO `user_permission` VALUES ('50', '用户管理', '40', '用户管理', '49', NOW(), null);
+INSERT INTO `user_permission` VALUES ('51', '角色管理', '41', '角色管理', '49', NOW(), null);
+INSERT INTO `user_permission` VALUES ('52', '部门管理', '42', '部门管理', '49', NOW(), null);
+INSERT INTO `user_permission` VALUES ('53', '自定义表管理', '43', '自定义表管理', '49', NOW(), null);
+INSERT INTO `user_permission` VALUES ('54', '系统配置', '44', '系统配置', '49', NOW(), null);
+
+INSERT INTO `user_permission` VALUES ('55', '录音质检', '45', '3.png', '43', NOW(), null);
+
+INSERT INTO `user_permission` VALUES ('56', '报表管理', '49', '报表管理', '2', NOW(), '27');
+INSERT INTO `user_permission` VALUES ('57', '话务报表', '50', '话务报表', '56', NOW(), '1');
+INSERT INTO `user_permission` VALUES ('58', '业务报表', '51', '业务报表', '56', NOW(), '2');
+INSERT INTO `user_permission` VALUES ('59', '计费报表', '52', '计费报表', '56', NOW(), '3');
+
+
+INSERT INTO `user_permission` VALUES ('60', '网络配置', '53', '网络配置', '3', NOW(), '30');
+-- INSERT INTO `user_permission` VALUES ('61', '集群管理', '54', '集群管理', '60', NOW(), '1');
+INSERT INTO `user_permission` VALUES ('62', '网络配置', '55', '网络配置', '60', NOW(), '2');
+INSERT INTO `user_permission` VALUES ('63', 'SIP参数配置', '56', 'SIP参数配置', '60', NOW(), '3');
+
+INSERT INTO `user_permission` VALUES ('64', 'IPPBX配置', '57', 'IPPBX配置', '3', NOW(), '31');
+INSERT INTO `user_permission` VALUES ('65', 'Gateway配置', '58', 'Gateway配置', '64', NOW(), '1');
+INSERT INTO `user_permission` VALUES ('66', '接入号配置', '59', '接入号配置', '64', NOW(), '2');
+INSERT INTO `user_permission` VALUES ('67', '分机配置', '60', '分机配置', '64', NOW(), '3');
+INSERT INTO `user_permission` VALUES ('68', '语音资源配置', '61', '语音资源配置', '64', NOW(), '4');
+INSERT INTO `user_permission` VALUES ('69', 'IVR配置', '62', 'IVR配置', '64', NOW(), '5');
+INSERT INTO `user_permission` VALUES ('70', '呼入路由', '63', '呼入路由', '64', NOW(), '6');
+INSERT INTO `user_permission` VALUES ('71', '呼出路由', '64', '呼出路由', '64', NOW(), '7');
+
+-- INSERT INTO `user_permission` VALUES ('72', '呼叫中心配置', '65', '呼叫中心配置', '3', NOW(), '32');
+INSERT INTO `user_permission` VALUES ('73', '技能组管理', '66', '技能组管理', '3', NOW(), '32');
+
+INSERT INTO `user_permission` VALUES ('74', '计费管理', '67', '计费管理', '2', NOW(), '23');
+INSERT INTO `user_permission` VALUES ('75', '计费明细', '68', '计费明细', '74', NOW(), '1');
+INSERT INTO `user_permission` VALUES ('76', '费率设置', '69', '费率设置', '74', NOW(), '2');
+
+INSERT INTO `user_permission` VALUES ('77', '接入号-话务报表', '70', '接入号-话务报表', '56', NOW(), '4');
+INSERT INTO `user_permission` VALUES ('78', '分机-话务报表', '71', '分机-话务报表', '56', NOW(), '5');
+INSERT INTO `user_permission` VALUES ('79', '坐席-话务报表', '72', '分机-话务报表', '56', NOW(), '6');
+INSERT INTO `user_permission` VALUES ('80', '坐席-KPI报表', '73', '坐席-KPI报表', '56', NOW(), '7');
+INSERT INTO `user_permission` VALUES ('81', '技能组-KPI报表', '74', '技能组-KPI报表', '56', NOW(), '8');
+
+INSERT INTO `user_permission` VALUES ('90', '查看号码', '75', '3.png', '2', NOW(), '75');
+
+
+
+
+DELETE FROM user_permissionrole_permission_link WHERE permissionrole_uuid = '000001';
+
+
+
+
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '2');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '3');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '36');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '37');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '38');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '39');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '40');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '41');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '42');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '43');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '44');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '45');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '46');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '47');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '48');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '49');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '50');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '51');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '52');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '53');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '54');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '55');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '56');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '57');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '58');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '59');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '60');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '62');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '63');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '64');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '65');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '66');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '67');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '68');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '69');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '70');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '71');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '73');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '74');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '75');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '76');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '77');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '78');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '79');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '80');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '81');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '82');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '91');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '92');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '93');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '98');
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '99');
+
+INSERT INTO `crm`.`user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000001', '101');
+
+
+
+
+INSERT INTO `user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000002', '91');
+INSERT INTO `user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000002', '92');
+INSERT INTO `user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000002', '93');
+INSERT INTO `user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000002', '98');
+INSERT INTO `user_permissionrole_permission_link` (`permissionrole_uuid`, `permission_uuid`) VALUES ('000002', '99');
+
+INSERT INTO `user_user_datarange_link` VALUES ('0', 'datarange', 'ada');
+INSERT INTO `user_user_datarange_link` VALUES ('0', 'queue', 'aee');
+
+
+INSERT INTO `user_user_permissionrole_link` (`user_uuid`, `permissionrole_uuid`) VALUES ('0', '000001');
+
+
+
+
+-- 新的数据模块
+INSERT INTO `user_action` VALUES ('91', '数据管理', '0', NULL, NULL, 'fa fa-lg fa-fw fa-tasks', '0', '0', '21');
+INSERT INTO `user_action` VALUES ('92', '批次管理', '0', 'databatch/data', 'databatch', 'fa fa-lg fa-fw fa-tasks', '0', '91', '22');
+
+-- 新的数据管理
+INSERT INTO `user_permission` VALUES ('91', '数据管理', '91', '数据整理', '2', NOW(), NULL);
+INSERT INTO `user_permission` VALUES ('92', '批次管理', '92', '批次管理', '91', NOW(), NULL);
+
+-- 新数据管理中添加群呼管理
+INSERT INTO `user_action` VALUES ('121', '群呼任务', '0', 'newdata/groupCall', 'newGroupCall', 'fa fa-lg fa-fw fa-tasks', '0', '91', '27');
+INSERT INTO `user_permission` VALUES ('101', '群呼任务', '121', '群呼任务', '91', NOW(), NULL);
+
+-- 新功能页面添加 人员数据  2015/08/26 by ChengXin
+INSERT INTO `user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('93', '部门数据管理', '0', 'deptdata/dept', 'deptdata', 'fa fa-lg fa-fw fa-tasks', '0', '91', '23');
+INSERT INTO `user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('93', '部门数据管理', '93', '部门数据管理', '91', '2015-06-26 16:05:07', NULL);
+
+-- 新功能页面添加 意向客户 2015/08/26 by Frank
+INSERT INTO `user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('94', '我的任务', '0', 'newuserdata', 'newuserdata', 'fa fa-lg fa-fw fa-tasks', '0', '0', '24');
+INSERT INTO `user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('94', '我的任务', '94', '我的任务', '1', '2015-06-26 16:05:07', '11');
+
+-- 新功能页面添加 人员数据 2015/08/27 by Frank
+INSERT INTO `user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('95', '我的意向客户', '0', 'newuserdata/data_intend_index', 'newuserdata_data_intend_index', 'fa fa-lg fa-fw fa-tasks', '0', '0', '25');
+INSERT INTO `user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('95', '我的意向客户', '95', '我的意向客户', '1', '2015-06-26 16:05:07', '12');
+
+-- 新功能页面添加 人员数据 2015/08/28 by ChengXin
+INSERT INTO user_action (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('96', '我的共享池', '0', 'globalsharedata/globalshare', 'globalsharedata', 'fa fa-lg fa-fw fa-tasks', '0', '0', '26');
+INSERT INTO user_permission (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('96', '我的共享池', '96', '我的共享池', '1', '2015-06-26 16:05:07', '13');
+-- 部门内数据
+INSERT INTO user_action (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('97', '部门内数据', '2', 'deptdata/dept/getDataCount', 'deptGetDataCount', 'fa fa-lg fa-fw fa-tasks', '0', '91', '27');
+-- 二次领用数据
+INSERT INTO user_action (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('98', '二次领用数据', '2', 'deptdata/dept/getOwnCount', 'deptGetOwnCount', 'fa fa-lg fa-fw fa-tasks', '0', '91', '28');
+-- 废号信息
+INSERT INTO user_action (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('99', '废号信息', '2', 'deptdata/dept/getAbandonCount', 'getAbandonCount', 'fa fa-lg fa-fw fa-tasks', '0', '91', '29');
+-- 黑名单信息
+INSERT INTO user_action (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('100', '黑名单信息', '2', 'deptdata/dept/getBlackListCount', 'getBlackListCount', 'fa fa-lg fa-fw fa-tasks', '0', '91', '30');
+-- 意向客户量
+INSERT INTO user_action (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('101', '意向客户量', '2', 'deptdata/dept/getIntentCount', 'getIntentCount', 'fa fa-lg fa-fw fa-tasks', '0', '91', '31');
+
+
+-- 系统首页
+-- 添加字典管理菜单
+
+INSERT INTO user_action (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('102', '系统首页', '0', 'homepage', 'homepage', 'fa fa-lg fa-fw fa-home', '0', '0', '0');
+INSERT INTO `user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('103', '字典管理', '0', 'dictionary', 'dictionary', 'fa fa-lg fa-fw fa-cogs', '0', '39', '49');
+INSERT INTO `user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('104', '数据报表', '0', 'report/databatch', 'reportdatabatch', 'fa fa-lg fa-fw fa-table', '0', '49', '3');
+
+-- 添加呼出弹屏
+INSERT INTO `user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('110', '呼出弹屏', '2', 'newuserdata/newdatacall', 'newdatacall', 'fa fa-lg fa-fw fa-tasks', '0', '91', '27');
+INSERT INTO `user_action` (`uuid`, `action_name`, `action_type`, `action_url`, `action_describe`, `action_css`, `action_json`, `parent_uuid`, `action_seq`) VALUES ('120', '用户任务管理', '0', 'userManage', 'userManage', 'fa fa-lg fa-fw fa-tasks', '0', '91', '27');
+
+INSERT INTO `user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('82', '字典管理', '103', '字典管理', '49', '2015-09-09 18:54:48', null);
+INSERT INTO user_permission (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('97', '系统首页', '102', '系统首页', '1', '2015-05-14 11:33:39', '0');
+-- 添加新的数据报表 2015/9/11
+INSERT INTO `user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('98', '数据报表', '104', '数据报表', '56', '2015-09-11 17:02:49', NULL);
+INSERT INTO `user_permission` (`uuid`, `permission_name`, `permission`, `permission_describe`, `parent_uuid`, `date`, `sequence`) VALUES ('99', '用户任务管理', '120', '用户任务管理', '91', '2015-06-26 16:05:07', NULL);
+
+
+-- V1.03菜单修改为1.04 2015/09/23 by ning
+-- UPDATE `crm`.`user_action` SET `uuid`='56', `action_name`='SIP参数配置', `action_type`='0', `action_url`='config/sipprofile', `action_describe`='configsipprofile', `action_css`='fa fa-lg fa-fw fa-asterisk ', `action_json`='0', `parent_uuid`='57', `action_seq`='8' WHERE (`uuid`='56');
+-- UPDATE `crm`.`user_action` SET `uuid`='66', `action_name`='技能组管理', `action_type`='0', `action_url`='config/queue', `action_describe`='configqueue', `action_css`='fa fa-lg fa-fw fa-asterisk ', `action_json`='0', `parent_uuid`='57', `action_seq`='9' WHERE (`uuid`='66');
+-- DELETE FROM user_action WHERE uuid='53' AND action_name LIKE '网络配置' AND parent_uuid = '0';
+-- DELETE FROM user_action WHERE uuid='103' AND action_name LIKE '字典管理' AND parent_uuid = '39';
+-- DELETE FROM user_action WHERE uuid='44' AND action_name LIKE '高级选项' AND parent_uuid = '39';
+-- UPDATE `crm`.`user_action` SET `uuid`='105', `action_name`='高级选项', `action_type`='0', `action_url`='otherconfig', `action_describe`='otherconfig', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='8' WHERE (`uuid`='105');
+-- UPDATE `crm`.`user_action` SET `uuid`='40', `action_name`='用户管理', `action_type`='0', `action_url`='user/user', `action_describe`='useruser', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='1' WHERE (`uuid`='40');
+-- UPDATE `crm`.`user_action` SET `uuid`='41', `action_name`='角色管理', `action_type`='0', `action_url`='user/permissionrole', `action_describe`='userpermissionrole', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='2' WHERE (`uuid`='41');
+-- UPDATE `crm`.`user_action` SET `uuid`='42', `action_name`='部门管理', `action_type`='0', `action_url`='user/datarange', `action_describe`='userdatarange', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='3' WHERE (`uuid`='42');
+-- UPDATE `crm`.`user_action` SET `uuid`='43', `action_name`='自定义表管理', `action_type`='0', `action_url`='design', `action_describe`='design', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='4' WHERE (`uuid`='43');
+-- UPDATE `crm`.`user_action` SET `uuid`='55', `action_name`='网络配置', `action_type`='0', `action_url`='netconfig', `action_describe`='netconfig', `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='39', `action_seq`='7' WHERE (`uuid`='55');
+-- UPDATE `crm`.`user_action` SET `uuid`='39', `action_name`='系统配置', `action_type`='0', `action_url`=NULL, `action_describe`=NULL, `action_css`='fa fa-lg fa-fw fa-cogs', `action_json`='0', `parent_uuid`='0', `action_seq`='41' WHERE (`uuid`='39');
+-- UPDATE `crm`.`user_action` SET `uuid`='57', `action_name`='IPPBX配置', `action_type`='0', `action_url`=NULL, `action_describe`=NULL, `action_css`='fa fa-lg fa-fw fa-asterisk ', `action_json`='0', `parent_uuid`='0', `action_seq`='39' WHERE (`uuid`='57');
+-- DELETE FROM user_permission where uuid='60' AND permission_name LIKE '网络配置';
+-- DELETE FROM user_permission where uuid='82' AND permission_name LIKE '字典管理';
+-- DELETE FROM user_permission where uuid='54' AND permission_name LIKE '系统配置';
+-- UPDATE `crm`.`user_permission` SET `uuid`='62', `permission_name`='网络配置', `permission`='55', `permission_describe`='网络配置', `parent_uuid`='49', `date`='2015-09-17 16:50:42', `sequence`='' WHERE (`uuid`='62');
+-- UPDATE `crm`.`user_permission` SET `uuid`='63', `permission_name`='SIP参数配置', `permission`='56', `permission_describe`='SIP参数配置', `parent_uuid`='64', `date`='2015-09-17 16:50:42', `sequence`='8' WHERE (`uuid`='63');
+-- UPDATE `crm`.`user_permission` SET `uuid`='73', `permission_name`='技能组管理', `permission`='66', `permission_describe`='技能组管理', `parent_uuid`='64', `date`='2015-09-17 16:50:43', `sequence`='9' WHERE (`uuid`='73');
+-- UPDATE `crm`.`user_permission` SET `uuid`='49', `permission_name`='系统配置', `permission`='39', `permission_describe`='系统配置', `parent_uuid`='3', `date`='2015-09-17 16:50:42', `sequence`='31' WHERE (`uuid`='49');
+-- UPDATE `crm`.`user_permission` SET `uuid`='64', `permission_name`='IPPBX配置', `permission`='57', `permission_describe`='IPPBX配置', `parent_uuid`='3', `date`='2015-09-17 16:50:43', `sequence`='29' WHERE (`uuid`='64');
+-- DELETE FROM user_permissionrole_permission_link where permission_uuid = '60';
+-- DELETE FROM user_permissionrole_permission_link where permission_uuid = '82';
+-- DELETE FROM user_permissionrole_permission_link where permission_uuid = '54';
+
+
+
+
+

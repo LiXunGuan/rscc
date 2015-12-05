@@ -1,0 +1,35 @@
+<style>
+	.row:before{
+		content:inherit;
+	}
+	#wid-id-5 header{
+		    background: #404040;
+		    color: #fff;
+	}
+	.tabs-left #demo-pill-nav{
+		text-align: right;
+		width:inherit;
+	}
+	.tab-content{
+		margin-left: 10%;
+		
+	}
+	.demo-modal{
+		max-width:100%;
+	}
+	.smart-form .label.col.col-8 {
+		height:50%;
+		margin-top:-17px;
+	}
+	.smart-form .icon-append {
+	    right: 14px;
+		font-style: inherit;
+		border-left-style: none;
+	}
+	.smart-form .input .icon-append+input, .smart-form .textarea .icon-append+textarea{
+		padding-right:18px
+	}
+	.col-lg-12, .col-xs-12, .col-sm-12, .col-md-12 {
+		width: 95%;
+	}
+</style>

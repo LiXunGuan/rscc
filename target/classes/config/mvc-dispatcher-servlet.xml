@@ -1,0 +1,100 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <value>text/plain;charset=UTF-8</value>
+                        </list>
+                    </property>
+                </bean>
+                <bean class="org.springframework.http.converter.ResourceHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.xml.SourceHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter"/>
+            </list>
+        </property>
+        <property name="synchronizeOnSession" value="true"/>
+    </bean>
+
+    <mvc:annotation-driven>
+    <mvc:async-support default-timeout="3000"/>
+    </mvc:annotation-driven>
+
+    <!-- 静态资源访问 -->
+
+    <mvc:resources location="/assets/**" mapping="/assets/**"/>
+    <mvc:resources location="/public/**" mapping="/public/**"/>
+    <mvc:resources location="/aui/**" mapping="/aui/**"/>
+    <mvc:resources location="/docs/**" mapping="/docs/**"/>
+    <mvc:resources location="/css/**" mapping="/css/**"/>
+    <mvc:resources location="/sound/**" mapping="/sound/**"/>
+
+
+    <context:component-scan base-package="com.ruishengtech" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+
+    <!-- freemarker-->
+    <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver"
+          p:exposeSpringMacroHelpers="true">
+        <property name="prefix" value=""/>
+        <property name="suffix" value=".ftl"/>
+        <property name="contentType" value="text/html; charset=UTF-8"/>
+    </bean>
+
+
+    <bean id="freemarkerConfig"
+          class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <property name="templateLoaderPath" value="/WEB-INF/views/"/>
+        <property name="freemarkerSettings">
+            <props>
+                <prop key="defaultEncoding">UTF-8</prop>
+                <prop key="auto_import">common.ftl as c</prop>
+                <prop key="number_format">0.##</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!---jade -->
+    <bean id="templateLoader" class="de.neuland.jade4j.spring.template.SpringTemplateLoader">
+        <property name="basePath" value="/WEB-INF/view/"/>
+    </bean>
+
+    <bean id="jadeConfiguration" class="de.neuland.jade4j.JadeConfiguration">
+        <property name="prettyPrint" value="false"/>
+        <property name="caching" value="false"/>
+        <property name="templateLoader" ref="templateLoader"/>
+    </bean>
+
+    <bean id="viewResolver" class="de.neuland.jade4j.spring.view.JadeViewResolver">
+        <property name="configuration" ref="jadeConfiguration"/>
+        <property name="renderExceptions" value="true"/>
+    </bean>
+
+    <!--jsp-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+
+    <mvc:interceptors>
+        <bean class="com.ruishengtech.rscc.crm.ui.MvcInterceptor"></bean>
+    </mvc:interceptors>
+
+    <!--<bean id="exceptionHandler" class="com.ruishengtech.core.ExceptionHandler"/>-->
+
+</beans>
